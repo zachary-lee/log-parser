@@ -62,14 +62,17 @@ if (!validTags($tags)) {
 }
 $file = $argv[ $argc - 1 ];
 
-if (strpos($file, 'error_log') === false) {
-  die('This script only works on the Apache error_log');
-} else if (!file_exists($file)) {
-  die('Verify the error_log path is correct');
-} else if (!$errorLog = file_get_contents($file)) {
-  die('Unable to open the error_log file, or the file is empty');
+if ($file !== $_SERVER['SCRIPT_FILENAME']) {
+  if (strpos($file, 'error_log') === false) {
+    die('This script only works on the Apache error_log');
+  } else if (!file_exists($file)) {
+    die('Verify the error_log path is correct');
+  } else if (!$errorLog = file_get_contents($file)) {
+    die('Unable to open the error_log file, or the file is empty');
+  }
+} else if (! $errorLog = file("php://stdin")) {
+  die ('No log data provided');
 }
-
 
 $errorLogArray = explode("\n", $errorLog);
 

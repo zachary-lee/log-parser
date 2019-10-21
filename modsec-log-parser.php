@@ -26,12 +26,14 @@ function getTags ($options) {
 function validTags ($tags) {
   $validTags =
       ['client', 'file', 'line', 'id', 'msg', 'data', 'severity', 'ver', 'tag', 'hostname', 'uri', 'unique_id'];
+
   //if the intersection of the arrays is smaller than the user tags array then there is an invalid tag
   return count(array_intersect($validTags, $tags)) === count($tags);
 }
 
 /**
  * Output the matching data
+ *
  * @param array $matches An array of matching tag values from the error_log
  */
 function outputModSecResults ($matches) {
@@ -40,13 +42,14 @@ function outputModSecResults ($matches) {
     foreach ($match as $tag => $value) {
       echo "$value ";
     }
-    echo  PHP_EOL;
+    echo PHP_EOL;
   }
 }
 
-function outputCounts($output) {
-
+function outputCounts ($output) {
+  //Sort of hacky way of flattening a multidimensional array
   $flatOutput = array_map('end', $output);
+
   $output_count = array_count_values($flatOutput);
   echo "Results of counting the total number of matching tags: " . PHP_EOL . PHP_EOL;
   foreach ($output_count as $key => $value) {
@@ -54,6 +57,7 @@ function outputCounts($output) {
   }
 }
 
+///ideas: sort, count, prune duplicates (with counts), autoprepend args to URI, ignore msg
 $longOptions = [
     "tags::",
 ];
@@ -77,10 +81,9 @@ if ($file !== $_SERVER['SCRIPT_FILENAME']) {
     die('Unable to open the error_log file, or the file is empty');
   }
   $errorLogArray = explode("\n", $errorLog);
-} else if (! $errorLogArray = file("php://stdin")) {
+} else if (!$errorLogArray = file("php://stdin")) {
   die ('No log data provided');
 }
-
 
 
 $output = [];

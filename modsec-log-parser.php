@@ -49,7 +49,7 @@ function outputCounts($output) {
 }
 
 $longOptions = [
-    "tags:",
+    "tags::",
 ];
 
 $options = getopt('', $longOptions);

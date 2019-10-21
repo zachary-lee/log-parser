@@ -95,4 +95,4 @@ if (true) { //sort, uniq, count argument(s)
   $sorted_output = array_count_values($output);
   outputCounts($sorted_output);
 }
-outputModSecResults($output);
+//outputModSecResults($output);

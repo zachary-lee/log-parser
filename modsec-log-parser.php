@@ -1,25 +1,75 @@
 <?php
 
-$longOptions  = array(
+/**
+ * Get the tags from the user passed options
+ *
+ * @param array $options The command line options
+ *
+ * @return array The user passed tags, or the defaults if none were provided
+ */
+function getTags ($options) {
+  $tags = ['id', 'uri', 'msg']; //defaults
+  if (array_key_exists('tags', $options)) {
+    $tags = explode(',', $options['tags']);
+  }
+
+  return $tags;
+}
+
+/**
+ * Check if the provided tags are in the list of acceptable tags
+ *
+ * @param array $tags The user provided tags
+ *
+ * @return bool True if all tags are valid, false otherwise
+ */
+function validTags ($tags) {
+  $validTags =
+      ['client', 'file', 'line', 'id', 'msg', 'data', 'severity', 'ver', 'tag', 'hostname', 'uri', 'unique_id'];
+  //if the intersection of the arrays is smaller than the user tags array then there is an invalid tag
+  return count(array_intersect($validTags, $tags)) === count($tags);
+}
+
+/**
+ * Output the matching data
+ * @param array $matches An array of matching tag values from the error_log
+ */
+function outputModSecResults ($matches) {
+  foreach ($matches as $key => $value) {
+    echo "$value ";
+  }
+  echo  PHP_EOL;
+}
+
+function outputCounts($output) {
+  echo "Results of counting the total number of matching tags: " . PHP_EOL;
+  foreach ($output as $key => $value) {
+    echo "$key: $value " . PHP_EOL;
+  }
+}
+
+$longOptions = [
     "tags:",
-);
+];
 
 $options = getopt('', $longOptions);
 
-$tags = ['id', 'uri', 'msg'];
-if (array_key_exists('tags', $options)) {
-  $tags = explode(',', $options['tags']);
-}
+$tags = getTags($options);
 
-$file = $argv[$argc - 1];
+
+if (!validTags($tags)) {
+  die('You used an invalid tag');
+}
+$file = $argv[ $argc - 1 ];
 
 if (strpos($file, 'error_log') === false) {
   die('This script only works on the Apache error_log');
-} else if (! file_exists($file)) {
+} else if (!file_exists($file)) {
   die('Verify the error_log path is correct');
-} else if (! $errorLog = file_get_contents($file)) {
+} else if (!$errorLog = file_get_contents($file)) {
   die('Unable to open the error_log file, or the file is empty');
 }
+
 
 $errorLogArray = explode("\n", $errorLog);
 
@@ -32,11 +82,13 @@ foreach ($errorLogArray as $errorLogLine) {
   foreach ($tags as $tag) {
     preg_match("/\[({$tag}) \"(.*?)\"]/", $errorLogLine, $matches);
     if ($matches && $matches[1] === $tag) {
-      $output[$tag] = $matches[2];
+      $output[] = $matches[2];
     }
   }
 }
 
-foreach ($output as $key => $value) {
-  echo "$value ";
+if (true) { //sort, uniq, count argument(s)
+  $sorted_output = array_count_values($output);
+  outputCounts($sorted_output);
 }
+outputModSecResults($output);

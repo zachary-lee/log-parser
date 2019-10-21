@@ -35,15 +35,21 @@ function validTags ($tags) {
  * @param array $matches An array of matching tag values from the error_log
  */
 function outputModSecResults ($matches) {
-  foreach ($matches as $key => $value) {
-    echo "$value ";
+  echo "Matching results from the error_log: " . PHP_EOL . PHP_EOL;
+  foreach ($matches as $match) {
+    foreach ($match as $tag => $value) {
+      echo "$value ";
+    }
+    echo  PHP_EOL;
   }
-  echo  PHP_EOL;
 }
 
 function outputCounts($output) {
-  echo "Results of counting the total number of matching tags: " . PHP_EOL;
-  foreach ($output as $key => $value) {
+
+  $flatOutput = array_map('end', $output);
+  $output_count = array_count_values($flatOutput);
+  echo "Results of counting the total number of matching tags: " . PHP_EOL . PHP_EOL;
+  foreach ($output_count as $key => $value) {
     echo "$key: $value " . PHP_EOL;
   }
 }
@@ -82,17 +88,17 @@ foreach ($errorLogArray as $errorLogLine) {
   if (strpos($errorLogLine, 'ModSecurity') === false) {
     continue;
   }
-
+  $matches_output = [];
   foreach ($tags as $tag) {
     preg_match("/\[({$tag}) \"(.*?)\"]/", $errorLogLine, $matches);
     if ($matches && $matches[1] === $tag) {
-      $output[] = $matches[2];
+      $matches_output[] = $matches[2];
     }
   }
+  $output[] = $matches_output;
 }
 
 if (true) { //sort, uniq, count argument(s)
-  $sorted_output = array_count_values($output);
-  outputCounts($sorted_output);
+  outputCounts($output);
 }
-//outputModSecResults($output);
+outputModSecResults($output);

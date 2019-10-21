@@ -70,11 +70,12 @@ if ($file !== $_SERVER['SCRIPT_FILENAME']) {
   } else if (!$errorLog = file_get_contents($file)) {
     die('Unable to open the error_log file, or the file is empty');
   }
-} else if (! $errorLog = file("php://stdin")) {
+  $errorLogArray = explode("\n", $errorLog);
+} else if (! $errorLogArray = file("php://stdin")) {
   die ('No log data provided');
 }
 
-$errorLogArray = explode("\n", $errorLog);
+
 
 $output = [];
 foreach ($errorLogArray as $errorLogLine) {

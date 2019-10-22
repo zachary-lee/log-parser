@@ -70,6 +70,8 @@ $tags = getTags($options);
 if (!validTags($tags)) {
   die('You used an invalid tag');
 }
+
+//bug here when a file isn't given
 $file = $argv[ $argc - 1 ];
 
 if ($file !== $_SERVER['SCRIPT_FILENAME']) {

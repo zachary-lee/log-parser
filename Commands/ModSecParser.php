@@ -12,10 +12,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ModSecParser extends Command {
+
+  //The name of the command. Call with php parser.php modsec [options] [arguments]
   protected static $defaultName = 'modsec';
 
   /**
-   * Set up the meta-information for the command
+   * Set up the meta-information for the command. This function is required by Symfony's Command library
    */
   protected function configure () {
     $this
@@ -31,6 +33,14 @@ class ModSecParser extends Command {
         ->addOption('count', null, InputOption::VALUE_NONE, 'Shows a count of the matching IDs');
   }
 
+  /**
+   * Executes the command. This function is required by Symfony's Command library
+   *
+   * @param InputInterface  $input Holds the inputs
+   * @param OutputInterface $output Handles output messages
+   *
+   * @return int|void|null
+   */
   protected function execute (InputInterface $input, OutputInterface $output) {
     $tagsOption   = $input->getOption('tags');
     $fileArgument = $input->getArgument('file');
@@ -68,6 +78,8 @@ class ModSecParser extends Command {
   }
 
   /**
+   * Parses the tags from the logData and returns a multidimensional array of matches
+   *
    * @param array $logData An array of log data lines
    * @param array $tags An array of tags
    *
@@ -93,6 +105,8 @@ class ModSecParser extends Command {
   }
 
   /**
+   * Gets an array of lines from the log file given
+   *
    * @param string|null $file The error_log. If empty, we assume the data is being piped to stdin
    *
    * @return array|false

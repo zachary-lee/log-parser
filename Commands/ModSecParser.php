@@ -93,12 +93,12 @@ class ModSecParser extends Command {
   }
 
   /**
-   * @param string $file The error_log. If empty, we assume the data is being piped to stdin
+   * @param string|null $file The error_log. If empty, we assume the data is being piped to stdin
    *
    * @return array|false
    * @throws Exception Passes through various exceptions from getLogDataFromFile
    */
-  private function getLogData (string $file = ''): array {
+  private function getLogData (?string $file): array {
     if (!$file) {
       return $this->getLogDataFromPipe();
     }

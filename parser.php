@@ -5,6 +5,7 @@ require __DIR__ . '/Commands/ModSecParser.php';
 require __DIR__ . '/Commands/WWWErrorParser.php';
 require __DIR__.'/vendor/autoload.php';
 
+ini_set('memory_limit', -1);
 
 use Symfony\Component\Console\Application;
 use \Commands\ModSecParser;

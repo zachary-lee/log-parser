@@ -3,8 +3,10 @@
 namespace Commands;
 
 require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../functions.php';
 
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,14 +48,13 @@ class ModSecParser extends Command {
     $fileArgument = $input->getArgument('file');
     $tags         = explode(',', $tagsOption);
 
-    //posix_getuid is not defined on windows -- https://www.php.net/manual/en/function.posix-getuid.php
-    //a uid of 0 is root on most machines
-    if (function_exists('posix_getuid') && posix_getuid() !== 0) {
+    if (!userIsRoot()) {
       $output->writeln('You seem to not be root. You may have trouble reading the apache error_log as your base user');
     }
-
+    $output->writeln('Loading the file');
     try {
-      $errorLogArray = $this->getLogData($fileArgument);
+      $errorLogArray = getLogData($fileArgument);
+      $output->writeln('File loaded. Checking if it has data');
     } catch (Exception $e) {
       $output->writeln($e->getMessage());
 
@@ -85,7 +86,7 @@ class ModSecParser extends Command {
    *
    * @return array The output to show to the screen
    */
-  private function parseLogData (array $logData, array $tags): array {
+  function parseLogData (array $logData, array $tags = []): array {
     $output = [];
     foreach ($logData as $logLine) {
       if (strpos($logLine, 'ModSecurity') === false) {
@@ -103,50 +104,4 @@ class ModSecParser extends Command {
 
     return $output;
   }
-
-  /**
-   * Gets an array of lines from the log file given
-   *
-   * @param string|null $file The error_log. If empty, we assume the data is being piped to stdin
-   *
-   * @return array|false
-   * @throws Exception Passes through various exceptions from getLogDataFromFile
-   */
-  private function getLogData (?string $file): array {
-    if (!$file) {
-      return $this->getLogDataFromPipe();
-    }
-
-    return $this->getLogDataFromFile($file);
-  }
-
-  /**
-   * Gets the data out of stdin
-   *
-   * @return array|false An array of lines from stdin, or false if empty
-   */
-  private function getLogDataFromPipe (): array {
-    return file("php://stdin");
-  }
-
-  /**
-   * Gets the data out of the log file
-   *
-   * @param string $file The full path to the file containing the error_log data
-   *
-   * @return array|false An array of lines from the error log file, or false if empty
-   * @throws Exception Throws various exceptions based on the access and availability of the file
-   */
-  private function getLogDataFromFile ($file): array {
-    if (strpos($file, 'error_log') === false) {
-      throw new Exception('This script only works on the error_log or piped data');
-    } else if (!file_exists($file)) {
-      throw new Exception('File does not exist. Verify the error_log path you provided is correct');
-    } else if (!$errorLog = file($file)) {
-      throw new Exception('Unable to open the error_log file. Is the file readable by this user?');
-    }
-
-    return $errorLog;
-  }
-
 }

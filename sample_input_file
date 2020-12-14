@@ -1,0 +1,2 @@
+[Thu Dec 10 03:08:05.133856 2020] [ssl:warn] [pid 1485:tid 140411231111360] AH01909: www.westga.edu:443:0 server certificate does NOT include an ID which matches the server name
+[Thu Dec 10 03:08:05.208871 2020] [mpm_event:notice] [pid 1485:tid 140411231111360] AH00489: Apache/2.4.34 (Red Hat) OpenSSL/1.0.2k-fips configured -- resuming normal operations

@@ -69,14 +69,18 @@ class ModSecParser extends Command {
     }
 
     $parsedLogData = $this->parseLogData($errorLogArray, $tags);
-
-    foreach ($parsedLogData as $errorLogLineData) {
-      foreach ($errorLogLineData as $tagData) {
-        $output->write($tagData . ' ');
-      }
-      $output->writeln('');
+    if (empty($parsedLogData)) {
+	$output->writeln('There is no modsec data in the file');
     }
+    else {
+    	foreach ($parsedLogData as $errorLogLineData) {
+      	foreach ($errorLogLineData as $tagData) {
+        	$output->write($tagData . ' ');
+      	}
+      	$output->writeln('');
+    	}
   }
+}
 
   /**
    * Parses the tags from the logData and returns a multidimensional array of matches
@@ -89,10 +93,11 @@ class ModSecParser extends Command {
   function parseLogData (array $logData, array $tags = []): array {
     $output = [];
     foreach ($logData as $logLine) {
-      if (strpos($logLine, 'ModSecurity') === false) {
-        continue;
-      }
       $matches_output = [];
+      if (strpos($logLine, 'ModSecurity') === false) {
+	continue;
+      }
+      
       foreach ($tags as $tag) {
         preg_match("/\[({$tag}) \"(.*?)\"]/", $logLine, $matches);
         if ($matches && $matches[1] === $tag) {
@@ -101,7 +106,7 @@ class ModSecParser extends Command {
       }
       $output[] = $matches_output;
     }
-
+    
     return $output;
   }
 }

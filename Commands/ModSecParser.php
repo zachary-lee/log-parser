@@ -47,7 +47,7 @@ class ModSecParser extends Command {
     $tagsOption   = $input->getOption('tags');
     $fileArgument = $input->getArgument('file');
     $tags         = explode(',', $tagsOption);
-    $output->writeln($tags);
+    
     if (!userIsRoot()) {
       $output->writeln('You seem to not be root. You may have trouble reading the apache error_log as your base user');
     }

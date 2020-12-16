@@ -74,12 +74,12 @@ class ModSecParser extends Command {
     }
     else {
     	foreach ($parsedLogData as $errorLogLineData) {
-      	foreach ($errorLogLineData as $tagData) {
+      	    foreach ($errorLogLineData as $tagData) {
         	$output->write($tagData . ' ');
-      	}
-      	$output->writeln('');
-    	}
-  }
+      	    }
+      	    $output->writeln('');
+        }
+    }
 }
 
   /**
@@ -93,11 +93,10 @@ class ModSecParser extends Command {
   function parseLogData (array $logData, array $tags = []): array {
     $output = [];
     foreach ($logData as $logLine) {
-      $matches_output = [];
       if (strpos($logLine, 'ModSecurity') === false) {
 	continue;
       }
-      
+      $matches_output = [];
       foreach ($tags as $tag) {
         preg_match("/\[({$tag}) \"(.*?)\"]/", $logLine, $matches);
         if ($matches && $matches[1] === $tag) {

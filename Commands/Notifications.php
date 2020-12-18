@@ -3,7 +3,6 @@
 namespace Commands;
 
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../functions.php';
 
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
@@ -16,9 +15,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Notifications extends Command {
 
   //The name of the command. Call with php parser.php notifications [arguments]
-
   protected static $defaultName = 'notifications';
-
+  
   /**
    * Set up the meta-information for the command. This function is required by Symfony's Command library
    */
@@ -42,10 +40,12 @@ class Notifications extends Command {
  
       $function_output = null;
       $return = null;
-      exec( 'php parser.php modsec sample_file', $function_output, $return);
+      $input_file = $input->getArgument('file');     
+ 
+      exec( 'php parser.php modsec ' . $input_file, $function_output, $return);
       $error_severities = getErrorLevel($function_output); 
+      print(sendEmail($error_severities));     
       $output->writeln($error_severities);
-    
       return;
   }
 }
@@ -53,19 +53,40 @@ class Notifications extends Command {
   * Gets the error level part of the parsed file
   *
   * @param array $modsec_errors the parsed modsec file content
-  * 
-  *@return string $output the list of the error levels (THIS IS ONLY NEEDED FOR TESTING)
+  *
+  * @return String $output the error messages that match the severity criterea 
   */ 
   function getErrorLevel (array $modsec_errors) {
-   
-      $output = '';   
+ 
+      $output = '';
+ 
       foreach ($modsec_errors as $error_line) {
 	  $split_error_line = explode(' ', $error_line);
 	  $error_level = $split_error_line[count($split_error_line) - 1];
-	  
 	  if ($error_level == 'CRITICAL') {	
-              $output .= $error_level . "\n";
- 	  }
+              $output .= $error_line . "\n";
+          }
       }
       return $output;
+  }
+  
+  /**
+  * Sends an email about the modsec errors
+  *
+  * @param String $message the modsec errors that will be the content of the email
+  *
+  * @return String the message to the console stating if the email was successfully sent
+  */
+  function sendEmail(String $message) {
+    
+      $sender = 'noreply@domain.edu';
+      $recipient = 'email@domain.edu';
+      $subject = 'modsec errors';
+      $headers = 'From:' . $sender;
+      
+      if (mail($recipient, $subject, $message, $headers)) {
+          return "email sent\n";
+      } else {
+          return "email not sent\n";
+      }
   }

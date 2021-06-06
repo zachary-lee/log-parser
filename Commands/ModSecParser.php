@@ -28,7 +28,7 @@ class ModSecParser extends Command {
         //Add more arguments here -- "file" has to be the last argument added (before the options)
         ->addArgument('file', InputArgument::OPTIONAL)
         ->addOption('tags', null, InputOption::VALUE_OPTIONAL,
-            'Comma separated list of log keys. Defaults to "id,uri,msg"', "id,uri,msg")
+            'Comma separated list of log keys. Defaults to "id,uri,msg,severity"', "id,uri,msg,severity")
         ->addOption('sort', null, InputOption::VALUE_NONE, 'Sorts the logs by ID')
         ->addOption('uniq', null, InputOption::VALUE_NONE,
             'Removes duplicate IDs. Will return only IDs even if more tags are provided')
@@ -70,11 +70,15 @@ class ModSecParser extends Command {
 
     $parsedLogData = $this->parseLogData($errorLogArray, $tags);
 
-    foreach ($parsedLogData as $errorLogLineData) {
-      foreach ($errorLogLineData as $tagData) {
-        $output->write($tagData . ' ');
+    if (empty($parsedLogData)) {
+      $output->writeln('There is no modsec data in the file');
+    } else {
+      foreach ($parsedLogData as $errorLogLineData) {
+        foreach ($errorLogLineData as $tagData) {
+          $output->write($tagData . ' ');
+        }
+        $output->writeln('');
       }
-      $output->writeln('');
     }
   }
 
@@ -90,6 +94,7 @@ class ModSecParser extends Command {
     $output = [];
     foreach ($logData as $logLine) {
       if (strpos($logLine, 'ModSecurity') === false) {
+
         continue;
       }
       $matches_output = [];
@@ -101,7 +106,6 @@ class ModSecParser extends Command {
       }
       $output[] = $matches_output;
     }
-
     return $output;
   }
 }
